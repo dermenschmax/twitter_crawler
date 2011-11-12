@@ -1,4 +1,11 @@
 TwitterCrawler::Application.routes.draw do
+  
+  match "/auth/:provider/callback" => "session#create"
+  
+  match "session/signout" => "session#signout"
+  
+  root :to => "twitter_crawler#index"
+  
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

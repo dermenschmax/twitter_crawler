@@ -1,0 +1,23 @@
+<div id="outer_container">
+  
+  <div id="menu">
+    <%= render :partial => "user" if (current_user) %>
+    <%= render :partial => "login" unless (current_user) %>
+  </div>
+  
+  <div id="content">
+    <div id="left">
+      left
+    </div> <!-- left -->
+    <div id="middle">
+      <p>
+        <img src="<%= current_user["image"] %>">
+        <%= current_user["nickname"]  %>
+      </p>
+    </div>
+    <div id="right">
+      right
+    </div>
+  </div> <!-- content -->
+  
+</div> <!-- outer_container -->

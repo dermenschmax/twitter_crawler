@@ -1,0 +1,41 @@
+// Place all the styles related to the twitter_crawler controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+#menu{
+    border-bottom: 1px solid black;
+    text-align: right;
+}
+
+#menu li{
+    list-style-type: none;
+}
+
+#left{
+    position: absolute;
+    left: 5;
+    width: 40%;
+    height: 100%;
+}
+
+#middle{
+    position: absolute;
+    left: 40%;
+    width: 20%;
+    border-left: 1px groove #eee;
+    border-right: 1px groove #eee;
+    height: 100%;
+    
+}
+
+#middle p{
+    margin-left: 5px;
+}
+
+#right{
+    position: absolute;
+    left: 60%;
+    width: 40%;
+    height: 100%;
+    
+}
