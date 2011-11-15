@@ -12,6 +12,7 @@ gem 'therubyracer'
 gem 'twitter'
 gem 'omniauth'
 gem 'jquery-rails'
+gem 'mongrel'
 
 
 # Gems used only for assets and not required
