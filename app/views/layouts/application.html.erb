@@ -7,8 +7,16 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
-
-<%= yield %>
-
+<div id="outer_container">
+  
+  <div id="menu">
+    <%= render :partial => "user" if (current_user) %>
+    <%= render :partial => "login" unless (current_user) %>
+  </div>
+  
+  <div id="content">
+    <%= yield %>
+  </div> <!-- content -->
+</div>  <!-- outer_container -->
 </body>
 </html>

@@ -8,6 +8,13 @@ class SessionController < ApplicationController
     session[:credentials] = omniauth['credentials']
     session[:user_info] = omniauth['user_info']
     
+    #uoi = Hash.new()
+    #uoi["name"] = current_user["name"]
+    #uoi["nickname"] = current_user["nickname"]
+    #uoi["image"] = current_user["image"]
+    #uoi["uid"] = session[:uid]
+    #session[:uoi] = uoi
+    
     # feed the magic twitter
     Twitter.configure do |config|
       config.consumer_key = "x6n3zw1f1W2a6xXeNt9M1g"
@@ -22,7 +29,7 @@ class SessionController < ApplicationController
     #logger.info("user_info: #{omniauth['user_info']}")
     #logger.info("session[:user_info]: #{session[:user_info]}")
     
-    redirect_to :controller => "twitter_crawler", :action => "index"
+    redirect_to :controller => "twitter_crawler", :action => "show", :id => session[:uid]
     
   end
   

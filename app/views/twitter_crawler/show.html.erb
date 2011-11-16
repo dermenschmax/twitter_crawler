@@ -1,0 +1,36 @@
+
+    <div id="left">
+      <h1>Followers</h1>
+      <ul>
+        <% @followers.each() do |f| -%>
+          <li style="list-style-image: url(<%= f.profile_image_url -%>);">
+            <%= link_to f.name, url_for(:action => "show", :id => f.id) %>
+          </li>
+        <% end -%>
+      </ul>
+    </div> <!-- left -->
+    <div id="middle">
+      <% unless @user.nil? %>
+      <p>
+        <img src="<%= @user.profile_image_url %>">
+        <%= @user.name  %>
+      </p>
+      <p>
+        <ul>
+          <% @user_tweets.each() do |t| -%>
+          <li><%= t.text %></li>
+          <% end -%>
+        </ul>
+      </p>
+      <% end -%>
+    </div>
+    <div id="right">
+      <h1>Friends</h1>
+      <ul>
+        <% @friends.each() do |f| -%>
+          <li style="list-style-image: url(<%= f.profile_image_url -%>);">
+            <%= link_to f.name, url_for(:action => "show", :id => f.id) %> (<%= f.followers_count() -%>)
+          </li>
+        <% end -%>
+      </ul>
+    </div>

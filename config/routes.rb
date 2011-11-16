@@ -4,6 +4,8 @@ TwitterCrawler::Application.routes.draw do
   
   match "session/signout" => "session#signout"
   
+  match "twitter_crawler/show/:id" => "twitter_crawler#show"
+  
   root :to => "twitter_crawler#index"
   
   # The priority is based upon order of creation:
