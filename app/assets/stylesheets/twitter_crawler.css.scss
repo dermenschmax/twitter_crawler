@@ -11,31 +11,53 @@
     list-style-type: none;
 }
 
+.user_listing li{
+    list-style-type: none;
+    #background-color: #eee;
+    margin-bottom: 2px;
+    border-radius: 15%;
+    #box-shadow: -2px 2px 0 #bbb;
+    border: 1px solid #aaa;
+    padding: 5px;
+}
+
 #left{
-    position: absolute;
-    left: 5;
-    width: 25%;
+    #position: absolute;
+    #left: 5;
+    float: left;
+    width: 20%;
     height: 100%;
 }
 
 #middle{
-    position: absolute;
-    left: 20%;
+    float: left;
     width: 50%;
-    border-left: 1px groove #eee;
-    border-right: 1px groove #eee;
     height: 100%;
-    
+    margin-left: 20px;
+    vertical-align: middle;
+}
+
+#user{
+    background-color: #ddf;
+    border-radius: 5%;
+    box-shadow: 10px 10px 5px #99b;
+    padding: 15px;
 }
 
 #middle p{
     margin-left: 5px;
 }
 
+.user_tweets li{
+    list-style-type: none;
+    margin-bottom: 8px;
+}
+
+
 #right{
-    position: absolute;
-    left: 80%;
-    width: 25%;
-    height: 100%;
+    float: left;
     margin-left: 20px;
+    
+    width: 20%;
+    height: 100%;
 }

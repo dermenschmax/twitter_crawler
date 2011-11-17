@@ -1,35 +1,38 @@
 
     <div id="left">
       <h1>Followers</h1>
-      <ul>
+      <ul class="user_listing">
         <% @followers.each() do |f| -%>
-          <li style="list-style-image: url(<%= f.profile_image_url -%>);">
+          <li>
+            <img src="<%= f.profile_image_url -%>" width="25" height="25">
             <%= link_to f.name, url_for(:action => "show", :id => f.id) %>
           </li>
         <% end -%>
       </ul>
     </div> <!-- left -->
     <div id="middle">
-      <% unless @user.nil? %>
-      <p>
-        <img src="<%= @user.profile_image_url %>">
-        <%= @user.name  %>
-      </p>
-      <p>
-        <ul>
-          <% @user_tweets.each() do |t| -%>
-          <li><%= t.text %></li>
-          <% end -%>
-        </ul>
-      </p>
+      <div id="user">
+        <% unless @user.nil? %>
+        <p style="background-image: url(<%= @user.profile_image_url %>); background-position: right; background-repeat: no-repeat;">
+          <h1><%= @user.name  %></h1>
+        </p>
+        <p>
+          <ul class="user_tweets">
+            <% @user_tweets.each() do |t| -%>
+            <li><%= t.text %></li>
+            <% end -%>
+          </ul>
+        </p>
+      </div>
       <% end -%>
     </div>
     <div id="right">
       <h1>Friends</h1>
-      <ul>
+      <ul class="user_listing">
         <% @friends.each() do |f| -%>
-          <li style="list-style-image: url(<%= f.profile_image_url -%>);">
-            <%= link_to f.name, url_for(:action => "show", :id => f.id) %> (<%= f.followers_count() -%>)
+          <li>
+            <img src="<%= f.profile_image_url -%>" width="25" height="25">
+            <%= link_to f.name, url_for(:action => "show", :id => f.id) %>
           </li>
         <% end -%>
       </ul>
