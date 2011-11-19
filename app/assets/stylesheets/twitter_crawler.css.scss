@@ -11,7 +11,7 @@
     list-style-type: none;
 }
 
-.user_listing li{
+.user_listing_entry{
     list-style-type: none;
     #background-color: #eee;
     margin-bottom: 2px;
@@ -19,6 +19,16 @@
     #box-shadow: -2px 2px 0 #bbb;
     border: 1px solid #aaa;
     padding: 5px;
+}
+
+
+.user_listing_entry div{
+    display: inline;
+    height: 100%;
+}
+
+.ule_text{
+    margin-left: 27px;
 }
 
 #left{

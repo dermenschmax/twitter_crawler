@@ -1,0 +1,14 @@
+<%
+  # Partial user_listing_entry
+  # locals: ue => friend, follower 
+ %>
+          <li class="user_listing_entry">
+            <div class="ule_img">
+              <img src="<%= ue.profile_image_url -%>" width="25" height="25">
+            </div>
+            <div class="ule_text">
+              <%= link_to ue.name, url_for(:action => "show", :id => ue.id) %>
+              <br/>
+              nächste Zeile
+            </div>
+          </li>

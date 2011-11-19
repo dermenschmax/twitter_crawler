@@ -3,10 +3,7 @@
       <h1>Followers</h1>
       <ul class="user_listing">
         <% @followers.each() do |f| -%>
-          <li>
-            <img src="<%= f.profile_image_url -%>" width="25" height="25">
-            <%= link_to f.name, url_for(:action => "show", :id => f.id) %>
-          </li>
+          <%= render :partial => "user_listing_entry", :locals => {:ue => f} %>
         <% end -%>
       </ul>
     </div> <!-- left -->
