@@ -13,27 +13,31 @@
 
 .user_listing_entry{
     list-style-type: none;
-    #background-color: #eee;
     margin-bottom: 2px;
     border-radius: 15%;
-    #box-shadow: -2px 2px 0 #bbb;
     border: 1px solid #aaa;
     padding: 5px;
+    min-height: 2em;
 }
 
 
-.user_listing_entry div{
-    display: inline;
+.ule_img{
+    width: 30px;
     height: 100%;
+    float: left;
+    clear: right;
 }
 
 .ule_text{
-    margin-left: 27px;
+    height: 100%;
+    margin-left: 30px;
+}
+
+.user_short_info{
+    font-size: x-small;
 }
 
 #left{
-    #position: absolute;
-    #left: 5;
     float: left;
     width: 20%;
     height: 100%;
@@ -52,6 +56,13 @@
     border-radius: 5%;
     box-shadow: 10px 10px 5px #99b;
     padding: 15px;
+}
+
+#user_heading h1{
+}
+
+#user_heading img{
+    float: right;
 }
 
 #middle p{
