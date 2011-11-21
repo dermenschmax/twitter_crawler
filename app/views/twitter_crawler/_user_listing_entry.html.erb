@@ -11,7 +11,12 @@
             <div class="ule_text">
               <%= link_to ue.name, url_for(:action => "show", :id => ue.id) %>
               <br/>
-              <span class="user_short_info">follow: <%= ue.followers_count %> / friend: <%= ue.friends_count %> / <%= ue.lang %></span>
+              <span class="user_short_info">
+                follow: <%= ue.followers_count %> /
+                friend: <%= ue.friends_count %> /
+                <%= ue.lang %>
+                <a class="ule_expose" href="#">[+]</a>
+              </span>
             </div>
             </div>
           </li>
