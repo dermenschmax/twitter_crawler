@@ -12,6 +12,7 @@ function reg_events(){
   $('div').click(function() {
         alert('Handler for .click() called.');
     });
+  $('body').css('background-color', '#1f5');
 }
 
 
