@@ -8,11 +8,7 @@ function ule_expose(e){
 function reg_events(){
     
   // ---- user_listing_entry ----
-  $('.lnk').click(function() { alert('inline');});
-  $('div').click(function() {
-        alert('Handler for .click() called.');
-    });
-  $('body').css('background-color', '#1f5');
+  $('.lnk').click(ule_expose);
 }
 
 
