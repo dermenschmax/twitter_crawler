@@ -2,8 +2,8 @@
   # Partial user_listing_entry
   # locals: ue => friend, follower 
  %>
-          <li class="user_listing_entry">
-            <div>
+          <li id="ule_<%= ue.id -%>" class="user_listing_entry">
+            <div class="ule_short">
               
               <div class="ule_img">
                 <img src="<%= ue.profile_image_url -%>" width="25" height="25">
@@ -16,9 +16,28 @@
                   follow: <%= ue.followers_count %> /
                   friend: <%= ue.friends_count %> /
                   <%= ue.lang %>
-                  <a class="lnk" href="#">[+]</a>
+                  <a id = "lnk_<%= ue.id -%>" class="lnk" href="#">[+]</a>
                 </span>
               </div><!-- ule_text -->
               
-            </div>
+            </div> <!-- ule_short -->
+            
+            <div id="ule_all_<%= ue.id -%>" class="ule_all" style="display: none;">
+              <% unless ue.status.nil? -%>
+                <table>
+                  <tr>
+                    <td>HashTags</td>
+                    <td><%= join_hash_tags(ue.status.entities.hashtags) -%></td>
+                  </tr>
+                  <tr>
+                    <td>Mentions</td>
+                    <td><%= join_mentions(ue.status.entities.user_mentions) -%></td>
+                  </tr>
+                  <tr>
+                    <td><%= short_date(ue.status.created_at) %></td>
+                    <td><%= ue.status.text%></td>
+                  </tr>
+                </table>
+              <% end -%>
+            </div> <!-- ule_all -->
           </li>

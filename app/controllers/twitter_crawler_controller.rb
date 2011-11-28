@@ -54,7 +54,7 @@ class TwitterCrawlerController < ApplicationController
     users = Array.new()
     
     unless (@twitter_client.nil?)
-      users = @twitter_client.users(ids.first(100))
+      users = @twitter_client.users(ids.first(100), :include_entities => 1)
     end
     
     
@@ -64,7 +64,7 @@ class TwitterCrawlerController < ApplicationController
   
   def lookup_single_user(id)
     unless (@twitter_client.nil?)
-      user = @twitter_client.user(id.to_i)
+      user = @twitter_client.user(id.to_i, :include_entities => 1)
     end
     
     user
