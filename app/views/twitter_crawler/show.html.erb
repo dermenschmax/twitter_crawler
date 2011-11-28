@@ -16,11 +16,14 @@
           
         </p>
         <p>
-          <ul class="user_tweets">
+          <table id="user_tweets">
             <% @user_tweets.each() do |t| -%>
-            <li><%= t.text %></li>
+            <tr>
+              <td style="font-size: small;"><%= short_date(t.created_at) -%></td>
+              <td><%= t.text %></td>
             <% end -%>
-          </ul>
+            </tr>
+          </table>
         </p>
       </div>
       <% end -%>
