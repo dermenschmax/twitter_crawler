@@ -27,7 +27,7 @@ class TwitterCrawlerController < ApplicationController
         @user = lookup_single_user(@user_id)
         @friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
         @followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
-        @user_tweets = @twitter_client.user_timeline(@user_id.to_i)
+        @user_tweets = @twitter_client.user_timeline(@user_id.to_i, :include_entities => 1)
       end
       
       logger.info("@user = #{@user}")

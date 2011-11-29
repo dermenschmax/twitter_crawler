@@ -19,8 +19,13 @@
           <table id="user_tweets">
             <% @user_tweets.each() do |t| -%>
             <tr>
-              <td style="font-size: small;"><%= short_date(t.created_at) -%></td>
-              <td><%= t.text %></td>
+              <td class="ut_timestamp"><%= short_date(t.created_at) -%></td>
+              <td>
+                <%= t.text %>
+                <p style="font-size: x-small;">
+                  <%= t.entities.user_mentions unless t.entities.user_mentions.empty?%>
+                </p>
+              </td>
             <% end -%>
             </tr>
           </table>
