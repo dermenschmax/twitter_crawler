@@ -6,6 +6,8 @@ TwitterCrawler::Application.routes.draw do
   
   match "twitter_crawler/show/:id" => "twitter_crawler#show"
   
+  match "twitter_crawler/conversation" => "twitter_crawler#conversation"
+  
   root :to => "twitter_crawler#index"
   
   # The priority is based upon order of creation:

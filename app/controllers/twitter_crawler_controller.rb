@@ -41,6 +41,15 @@ class TwitterCrawlerController < ApplicationController
   end
   
   
+  # ------------------------------------------------------------------
+  # Zeichnet einen Gesprächsfluss nach. Der wird in Twitter über @mentions
+  # abgebildet.
+  # ------------------------------------------------------------------
+  def conversation
+  end
+  
+  
+  
   protected
   
   

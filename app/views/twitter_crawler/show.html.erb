@@ -21,9 +21,13 @@
             <tr>
               <td class="ut_timestamp"><%= short_date(t.created_at) -%></td>
               <td>
-                <%= t.text %>
+                <% link_mentions_helper(t.text).each() do |t| %>
+                  <%= t %>
+                <% end %>
                 <p style="font-size: x-small;">
-                  <%= t.entities.user_mentions unless t.entities.user_mentions.empty?%>
+                  <% t.entities.user_mentions.each() do |m| -%>
+                    @<%= link_to m.screen_name, :id => m.id %>
+                  <% end unless t.entities.user_mentions.empty? %>
                 </p>
               </td>
             <% end -%>

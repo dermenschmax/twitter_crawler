@@ -29,30 +29,36 @@ module TwitterCrawlerHelper
   
   
   # ------------------------------------------------------------------
-  # Verlinkt die user_mentions in dem übergebenen String.
+  # Verlinkt die user_mentions in dem übergebenen String. Durch das Escaping
+  # ist die Methode kompliziert. Wir teilen den String in mehrere Teile. Es wird
+  # ein Array zurück geliefert. Teile davon stammen direkt aus dem Tweet (unsicher)
+  # und Teile sind von uns (sicher). 
   #
   # Parameter:
   #   text    der zu verlinkende Text (der tweet)
   #
   # Rückgabe:
-  #   der neue Text mit links drin
+  #   das oben beschriebene Array
   #
   # Test
   #   twitter_crawler_helper_test::link_mention_helper
   # ------------------------------------------------------------------
+  
   def link_mentions_helper(text)
-    s = ""
+    a = []
+    
     unless (text.nil?)
       text.lines(" ") do |l|
         if (!l.nil? && l.size > 0 && l[0] == "@") then
-          s += "<a href='#'>#{l.strip}</a> "
+          lt = link_to(l.strip, url_for(:action => "conversation"))
+          a << lt
         else
-          s += l
+          a << l
         end
       end
     end
     
-    s
+    a
   end
 
 end
