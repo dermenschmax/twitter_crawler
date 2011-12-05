@@ -10,7 +10,7 @@
               </div> <!-- ule_img -->
               
               <div class="ule_text">
-                <%= link_to ue.name, url_for(:action => "show", :id => ue.id) %>
+                <%= link_to ue.name, url_for(:action => "show", :screen_name => ue.screen_name) %>
                 <br/>
                 <span class="user_short_info">
                   follow: <%= ue.followers_count %> /

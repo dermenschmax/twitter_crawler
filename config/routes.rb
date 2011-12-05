@@ -4,7 +4,7 @@ TwitterCrawler::Application.routes.draw do
   
   match "session/signout" => "session#signout"
   
-  match "twitter_crawler/show/:id" => "twitter_crawler#show"
+  match "twitter_crawler/show/:screen_name" => "twitter_crawler#show"
   
   match "twitter_crawler/conversation" => "twitter_crawler#conversation"
   

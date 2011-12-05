@@ -9,25 +9,27 @@ class TwitterCrawlerController < ApplicationController
   end
 
   # Params:
-  #   id   => zu zeigender User
+  #   screen_name   => zu zeigender User
   def show
     
     @friends = Array.new()
     @followers = Array.new()
-    @user_id = params[:id]
+    sn = params[:screen_name]
     
-    unless (@user_id.nil?)
+    unless (sn.nil?)
       
       @twitter_client = Twitter::Client.new()
       
       unless (@twitter_client.nil?)
-        friend_ids = @twitter_client.friend_ids(@user_id.to_i) 
-        follower_ids = @twitter_client.follower_ids(@user_id.to_i) 
         
-        @user = lookup_single_user(@user_id)
+        @user = lookup_screen_name(sn)
+        friend_ids = @twitter_client.friend_ids(@user.screen_name) 
+        follower_ids = @twitter_client.follower_ids(@user.screen_name) 
+        
+        
         @friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
         @followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
-        @user_tweets = @twitter_client.user_timeline(@user_id.to_i, :include_entities => 1)
+        @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
       end
       
       logger.info("@user = #{@user}")
@@ -99,13 +101,8 @@ class TwitterCrawlerController < ApplicationController
   
   def lookup_screen_name(sn)
     
-    logger.debug("[lookup_screen_name] sn: #{sn}")
-    logger.debug("[lookup_screen_name] twitter_client: #{@twitter_client}")
-    
     unless (@twitter_client.nil? || sn.nil?)
       user = @twitter_client.user(sn, :include_entities => 1)
-      
-      logger.debug("[lookup_screen_name] found: #{user}")
     end
     
     user

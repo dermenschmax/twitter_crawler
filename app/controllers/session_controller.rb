@@ -28,8 +28,9 @@ class SessionController < ApplicationController
     #logger.info("uid: #{omniauth['uid']}")
     #logger.info("user_info: #{omniauth['user_info']}")
     #logger.info("session[:user_info]: #{session[:user_info]}")
+    #logger.info("session[:user_info]['nick_name']: #{session[:user_info]['nickname']}")
     
-    redirect_to :controller => "twitter_crawler", :action => "show", :id => session[:uid]
+    redirect_to :controller => "twitter_crawler", :action => "show", :screen_name => session[:user_info]["nickname"]
     
   end
   
