@@ -44,8 +44,25 @@ class TwitterCrawlerController < ApplicationController
   # ------------------------------------------------------------------
   # Zeichnet einen Gesprächsfluss nach. Der wird in Twitter über @mentions
   # abgebildet.
+  #
+  # Parameter:
+  #   persa:          screen_name der sprechenden Person A (da wurde gerade geklickt)
+  #   persb:          screen_name der angesprochenen Person
+  #   tweet_date:     Datum des Tweets, 
   # ------------------------------------------------------------------
-  def conversation
+  def conversation()
+    @twitter_client = Twitter::Client.new()
+    name_a = params[:persa]
+    name_b = params[:persb]
+    tweet_date = params[:tweet_date]
+    
+    @user_a = lookup_screen_name(name_a)
+    @user_b = lookup_screen_name(name_b)
+    
+    unless(@twitter_client.nil?)
+      @user_a_tweets = @twitter_client.user_timeline(@user_a.screen_name, :include_entities => 1)
+      @user_b_tweets = @twitter_client.user_timeline(@user_b.screen_name, :include_entities => 1)
+    end
   end
   
   
@@ -74,6 +91,21 @@ class TwitterCrawlerController < ApplicationController
   def lookup_single_user(id)
     unless (@twitter_client.nil?)
       user = @twitter_client.user(id.to_i, :include_entities => 1)
+    end
+    
+    user
+  end
+  
+  
+  def lookup_screen_name(sn)
+    
+    logger.debug("[lookup_screen_name] sn: #{sn}")
+    logger.debug("[lookup_screen_name] twitter_client: #{@twitter_client}")
+    
+    unless (@twitter_client.nil? || sn.nil?)
+      user = @twitter_client.user(sn, :include_entities => 1)
+      
+      logger.debug("[lookup_screen_name] found: #{user}")
     end
     
     user

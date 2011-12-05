@@ -21,8 +21,8 @@
             <tr>
               <td class="ut_timestamp"><%= short_date(t.created_at) -%></td>
               <td>
-                <% link_mentions_helper(t.text).each() do |t| %>
-                  <%= t %>
+                <% link_mentions_helper(t.text, t.created_at).each() do |t| %>
+                  <%= t -%>
                 <% end %>
                 <p style="font-size: x-small;">
                   <% t.entities.user_mentions.each() do |m| -%>
