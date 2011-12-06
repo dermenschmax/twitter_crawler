@@ -17,8 +17,8 @@ class SessionController < ApplicationController
     
     # feed the magic twitter
     Twitter.configure do |config|
-      config.consumer_key = "x6n3zw1f1W2a6xXeNt9M1g"
-      config.consumer_secret = "UdOj3XFVKpdBh0dVcW4GouW6xeFpMXtxCi61TpWNlmA"
+      #config.consumer_key = wird vom gem gesetzt
+      #config.consumer_secret = wird im initializer gesetzt
       config.oauth_token = session[:credentials]["token"]
       config.oauth_token_secret = session[:credentials]["secret"]
     end
