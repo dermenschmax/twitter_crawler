@@ -4,12 +4,25 @@ class TwitterCrawlerController < ApplicationController
   # Methode zum Helper machen:
   helper_method :current_user
   
+  
+  
   def index
   
   end
 
+
+  # ------------------------------------------------------------------
+  # Zeigt Details zum übergebenen User
+  # 
   # Params:
   #   screen_name   => zu zeigender User
+  #  
+  # Setzt
+  #   @friends
+  #   @folloers
+  #   @user
+  #   @user_tweets
+  # ------------------------------------------------------------------
   def show
     
     @friends = Array.new()
@@ -74,6 +87,7 @@ class TwitterCrawlerController < ApplicationController
   
   # ------------------------------------------------------------------
   # Läuft durch die übergebenen IDs und fragt die zugehörigen User ab.
+  # Sortiert nach Datum des letzten Tweets.
   #
   # Gibt Mash-Objekte zurück.
   # ------------------------------------------------------------------
@@ -85,11 +99,39 @@ class TwitterCrawlerController < ApplicationController
       users = @twitter_client.users(ids.first(100), :include_entities => 1)
     end
     
+    users.sort_by! do |u|
+      unless (u.status.nil?) then
+        # TODO: Datum parsen
+        u.status.created_at
+        logger.debug("u.status.created_at: #{u.status.created_at}")
+      else
+        # TODO: 01.01.1970 liefern
+        "hallo"
+        logger.debug("u hat keinen status")
+      end
+    end 
+    
+    users.each do |u|
+      if (u.status.nil?) then
+        logger.debug("hallo")
+      else
+        logger.debug(u.status.created_at)
+      end
+    end
     
     users
   end
   
   
+  # ------------------------------------------------------------------
+  # Sucht einen User anhand der übergebenen ID
+  #
+  # Params:
+  #     id    twitter user id
+  #
+  # Returns:
+  #   user als Mash
+  # ------------------------------------------------------------------
   def lookup_single_user(id)
     unless (@twitter_client.nil?)
       user = @twitter_client.user(id.to_i, :include_entities => 1)
