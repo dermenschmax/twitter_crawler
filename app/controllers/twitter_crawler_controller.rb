@@ -117,7 +117,7 @@ class TwitterCrawlerController < ApplicationController
         d = Date.parse(u.status.created_at)
       else
         # TODO: 01.01.1970 liefern
-        Date.new("1970")
+        Date.new(1970)
       end
     end
     
