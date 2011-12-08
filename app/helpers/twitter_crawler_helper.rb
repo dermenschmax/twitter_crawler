@@ -1,5 +1,6 @@
 module TwitterCrawlerHelper
 
+
   def short_date(d)
     
     ret = ""

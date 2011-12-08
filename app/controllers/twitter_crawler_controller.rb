@@ -2,7 +2,7 @@ class TwitterCrawlerController < ApplicationController
   
   # Controller kann keine helper Methoden aufrufen. Man kann aber eine Controller
   # Methode zum Helper machen:
-  helper_method :current_user
+  helper_method :current_user, :current_user_name, :current_user_screen_name
   
   
   
@@ -55,6 +55,16 @@ class TwitterCrawlerController < ApplicationController
     session[:user_info]
   end
   
+  def current_user_name
+    session[:user_info]["name"]
+  end
+  
+  # ------------------------------------------------------------------
+  # Bestimmt den screen_name des angemeldeten Users aus der Session
+  # ------------------------------------------------------------------
+  def current_user_screen_name
+    session[:user_info]["nickname"]
+  end
   
   # ------------------------------------------------------------------
   # Zeichnet einen Gesprächsfluss nach. Der wird in Twitter über @mentions
