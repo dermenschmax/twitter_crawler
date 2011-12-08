@@ -99,27 +99,20 @@ class TwitterCrawlerController < ApplicationController
       users = @twitter_client.users(ids.first(100), :include_entities => 1)
     end
     
+    # Ergebnis nach Datum des letzten Tweets (status) sortieren
     users.sort_by! do |u|
       unless (u.status.nil?) then
         # TODO: Datum parsen
-        u.status.created_at
-        logger.debug("u.status.created_at: #{u.status.created_at}")
+        
+        d = Date.parse(u.status.created_at)
       else
         # TODO: 01.01.1970 liefern
-        "hallo"
-        logger.debug("u hat keinen status")
-      end
-    end 
-    
-    users.each do |u|
-      if (u.status.nil?) then
-        logger.debug("hallo")
-      else
-        logger.debug(u.status.created_at)
+        Date.new("1970")
       end
     end
     
-    users
+    # Absteigend sortieren
+    users.reverse!
   end
   
   
