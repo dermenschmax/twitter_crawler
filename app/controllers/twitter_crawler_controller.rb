@@ -6,6 +6,10 @@ class TwitterCrawlerController < ApplicationController
   
   
   
+  # ------------------------------------------------------------------
+  # Wird nur gezeigt, wenn der User noch nicht angemeldet ist
+  #
+  # ------------------------------------------------------------------
   def index
   
   end
@@ -32,6 +36,7 @@ class TwitterCrawlerController < ApplicationController
     unless (sn.nil?)
       
       @twitter_client = Twitter::Client.new()
+      tw_user = TwitterUser.find_by_screen_name(sn)
       
       unless (@twitter_client.nil?)
         
