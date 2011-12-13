@@ -68,7 +68,7 @@ module TwitterCrawlerHelper
         if (!l.nil? && l.size > 0 && l.start_with?("@")) then
           persb = l.delete("@").strip()
           t_date = date_with_time(tweet_date)
-          lt = link_to(l.strip, url_for(:action => "conversation", :persa=> @user.screen_name, :persb => persb, :tweet_date => t_date))
+          lt = link_to(l.strip, url_for(:controller => "twitter_crawler", :action => "conversation", :persa=> @user.screen_name, :persb => persb, :tweet_date => t_date))
           a << lt
         else
           a << l

@@ -14,6 +14,7 @@ gem 'twitter'
 gem 'omniauth'
 gem 'jquery-rails'
 gem 'mongrel'
+gem 'hashie'      # Hashie::Mash
 
 
 # Gems used only for assets and not required
