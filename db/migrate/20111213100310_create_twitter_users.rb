@@ -11,11 +11,9 @@ class CreateTwitterUsers < ActiveRecord::Migration
       t.string      :lang
       t.string      :profile_image_url
       
-      #t.timestamp   :tw_created_at
-      #t.text        :description
-      #t.integer     :statuses_count
-      #t.string      :time_zone
       t.timestamps
+      
+      t.text        :json_data
     end
   end
 end

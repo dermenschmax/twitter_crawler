@@ -24,9 +24,69 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
     fake_twitter_login
     tc = Twitter::Client.new()
     
-    assert_not_nil session[:provider] 
-    assert_not_nil session[:uid]
-    assert_not_nil session[:credentials]
-    assert_not_nil tc.user_timeline("der_mensch_max")
+    assert_not_nil(session[:provider], "provider should be stored in session")
+    assert_not_nil(session[:uid], "uid should be stored in session")
+    assert_not_nil(session[:credentials], "credentials should be stored in session")
+    assert_not_nil(tc.user_timeline("der_mensch_max"), "twitter client should be able to read user timeline")
+  end
+  
+  
+  # Zeigt Details zum übergebenen User
+  # 
+  # Params:
+  #   screen_name   => zu zeigender User
+  #  
+  # Setzt
+  #   @friends
+  #   @followers
+  #   @user
+  #   @user_tweets
+  test "show" do
+    
+    sn = "der_mensch_max"
+    fake_twitter_login()
+    
+    user_cnt = TwitterUser.count()
+    
+    get :show, :screen_name => sn
+    
+    user_cnt2 = TwitterUser.count()
+    
+    assert_response(:success, "show should return success")
+    assert_not_nil(assigns["friends"], "should set @friends")
+    assert_not_nil(assigns["followers"], "should set @followers")
+    assert_not_nil(assigns["user"], "should set @user")
+    assert_not_nil(assigns["user_tweets"], "should set @user_tweets")
+    assert((user_cnt + assigns["friends"].size + assigns["followers"].size + 1)== user_cnt2,
+           "#{user_cnt} + #{assigns["friends"].size} + #{assigns["followers"].size} +1 == #{user_cnt2} ")
+
+    tw = TwitterUser.find_by_screen_name(sn)
+    assert_not_nil(tw, "user in database")
+
+  end
+  
+  
+  # testet eine Subroutine von show, in der entschieden wird, ob ein nur user aus 
+  # der Datenbank kommt oder von Twitter geladen wird.
+  #
+  # Szenario:
+  #     - user anlegen
+  #     - show aufrufen
+  #     => user wird nicht aktualisiert (updated_at)
+  test "process_user" do
+    
+    fake_twitter_login()
+    sn = "der_mensch_max"
+    get :show, :screen_name => sn       # TwitterUser wurde angelegt (inkl. f&f)
+    
+    tw = TwitterUser.find_by_screen_name(sn)
+    assert_not_nil(tw, "found ref user in db")
+    
+    # beim zweiten Aufruf darf der User nicht aktualisiert werden (updated_at ist gleich)
+    get :show, :screen_name => sn
+    tw2 = TwitterUser.find_by_screen_name(sn)
+    assert_not_nil(tw2, "found ref user in db again")
+    assert(tw.updated_at == tw2.updated_at, "should not be updated -> #{tw.updated_at} == #{tw2.updated_at}")
+    assert(tw.updated_at != tw2.updated_at, "FAKE -> #{tw.updated_at} == #{tw2.updated_at}")
   end
 end

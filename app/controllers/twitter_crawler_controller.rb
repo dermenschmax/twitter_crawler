@@ -16,14 +16,23 @@ class TwitterCrawlerController < ApplicationController
 
 
   # ------------------------------------------------------------------
-  # Zeigt Details zum übergebenen User
+  # Zeigt Details zum übergebenen User.
+  #
+  # TODO: Lesen aus der Datenbank vs. Lesen von Twitter
+  #       (1) nur von Twitter lesen, wenn User nicht in lokaler DB, user_timeline
+  #           immer von Twitter
+  #       (2) aus der DB lesen, wenn vorhanden und Datensatz <heute> schon
+  #           aktualisiert wurde, user_timeline immer von Twitter
+  #       (3) von Twitter, wenn
+  #                 a) User nicht vorhanden oder
+  #                 b) User nicht nach dem letzten Status aktualisiert wurde 
   # 
   # Params:
   #   screen_name   => zu zeigender User
   #  
   # Setzt
   #   @friends
-  #   @folloers
+  #   @followers
   #   @user
   #   @user_tweets
   # ------------------------------------------------------------------
@@ -36,11 +45,10 @@ class TwitterCrawlerController < ApplicationController
     unless (sn.nil?)
       
       @twitter_client = Twitter::Client.new()
-      tw_user = TwitterUser.find_by_screen_name(sn)
+      @user = process_user(sn)
       
       unless (@twitter_client.nil?)
         
-        @user = lookup_screen_name(sn)
         friend_ids = @twitter_client.friend_ids(@user.screen_name) 
         follower_ids = @twitter_client.follower_ids(@user.screen_name) 
         
@@ -48,6 +56,7 @@ class TwitterCrawlerController < ApplicationController
         @friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
         @followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
+        
       end
       
       logger.info("@user = #{@user}")
@@ -71,33 +80,33 @@ class TwitterCrawlerController < ApplicationController
     session[:user_info]["nickname"]
   end
   
-  # ------------------------------------------------------------------
-  # Zeichnet einen Gesprächsfluss nach. Der wird in Twitter über @mentions
-  # abgebildet.
-  #
-  # Parameter:
-  #   persa:          screen_name der sprechenden Person A (da wurde gerade geklickt)
-  #   persb:          screen_name der angesprochenen Person
-  #   tweet_date:     Datum des Tweets, 
-  # ------------------------------------------------------------------
-  def conversation()
-    @twitter_client = Twitter::Client.new()
-    name_a = params[:persa]
-    name_b = params[:persb]
-    tweet_date = params[:tweet_date]
-    
-    @user_a = lookup_screen_name(name_a)
-    @user_b = lookup_screen_name(name_b)
-    
-    unless(@twitter_client.nil?)
-      @user_a_tweets = @twitter_client.user_timeline(@user_a.screen_name, :include_entities => 1)
-      @user_b_tweets = @twitter_client.user_timeline(@user_b.screen_name, :include_entities => 1)
-    end
-  end
-  
+
   
   
   protected
+  
+  
+  # ------------------------------------------------------------------
+  # Sucht den User heraus. Falls notwendig werden Informationen von Twitter
+  # geholt.
+  #
+  # Gibt das TwitterUser-Objekt des users zurück.Benötigt @twitter_client
+  #
+  # Parameter:
+  #     sn      screen_name
+  # ------------------------------------------------------------------
+  def process_user(sn)
+    tw_user = TwitterUser.find_by_screen_name(sn)
+    
+    #if (tw_user.nil?) then
+      @user = lookup_screen_name(sn)
+          
+      tw_user = TwitterUser.create_or_update(@user)
+      tw_user.save!
+    #end
+    
+    tw_user
+  end
   
   
   # ------------------------------------------------------------------
@@ -105,6 +114,10 @@ class TwitterCrawlerController < ApplicationController
   # Sortiert nach Datum des letzten Tweets.
   #
   # Gibt Mash-Objekte zurück.
+  #
+  # Algorithmus:
+  #   - Basis: die ersten 100 IDs, die werden gezeigt
+  #   - die aussuchen, die erfragt werden müssen (Kriterien s. show)
   # ------------------------------------------------------------------
   def user_lookup(ids)
     
@@ -114,14 +127,17 @@ class TwitterCrawlerController < ApplicationController
       users = @twitter_client.users(ids.first(100), :include_entities => 1)
     end
     
+    # User speichern
+    users.each do |u|
+      tw = TwitterUser.create_or_update(u)
+      tw.save!
+    end
+    
     # Ergebnis nach Datum des letzten Tweets (status) sortieren
     users.sort_by! do |u|
-      unless (u.status.nil?) then
-        # TODO: Datum parsen
-        
+      unless (u.status.nil?) then        
         d = Date.parse(u.status.created_at)
       else
-        # TODO: 01.01.1970 liefern
         Date.new(1970)
       end
     end
