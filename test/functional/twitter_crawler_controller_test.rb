@@ -87,6 +87,32 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
     tw2 = TwitterUser.find_by_screen_name(sn)
     assert_not_nil(tw2, "found ref user in db again")
     assert(tw.updated_at == tw2.updated_at, "should not be updated -> #{tw.updated_at} == #{tw2.updated_at}")
-    assert(tw.updated_at != tw2.updated_at, "FAKE -> #{tw.updated_at} == #{tw2.updated_at}")
   end
+  
+  
+  # get-request für User in der Datenbank. Wenn der User vor <heute> das letzte Mal aktualisiert
+  # wurde, gibt es trotzdem einen api Aufruf
+  test "process_user_yesterday" do
+    fake_twitter_login()
+    sn = "der_mensch_max"
+    
+    get :show, :screen_name => sn       # TwitterUser wurde angelegt (inkl. f&f)
+    
+    tw = TwitterUser.find_by_screen_name(sn)        # 
+    assert_not_nil(tw, "found ref user in db")
+    tw_yesterday = tw.updated_at - 86400            # "Gestern" berechnen
+    
+    tw.updated_at = Time.now - 172800  # 2 Tage     # Aktualisierung weit zurück drehen
+    assert(tw.save, "save updated user")
+    
+    tw2 = TwitterUser.find_by_screen_name(sn)       # DB-Wert überprüfen
+    assert(tw2.updated_at < tw_yesterday, "should be updated before yesterday, but is #{tw2.updated_at} tw: #{tw.updated_at}")
+    
+    get :show, :screen_name => sn                   # get request soll user aktualisieren (da alt)
+    tw3 = TwitterUser.find_by_screen_name(sn)
+    assert_not_nil(tw3, "found ref user in db once again")
+    assert(tw.updated_at < tw3.updated_at, "should be updated -> #{tw.updated_at} < #{tw3.updated_at}")
+  end
+  
+  
 end

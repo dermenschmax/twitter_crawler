@@ -72,7 +72,7 @@ class TwitterUser < ActiveRecord::Base
     self.lang = user_mashie.lang
     self.profile_image_url = user_mashie.profile_image_url
     self.json_data = user_mashie.to_json()
-    
+    self.updated_at = Time.now()
   end
   
   

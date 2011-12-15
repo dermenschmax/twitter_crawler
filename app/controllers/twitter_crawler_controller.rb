@@ -2,7 +2,8 @@ class TwitterCrawlerController < ApplicationController
   
   # Controller kann keine helper Methoden aufrufen. Man kann aber eine Controller
   # Methode zum Helper machen:
-  helper_method :current_user, :current_user_name, :current_user_screen_name
+  helper_method :current_user, :current_user_name, :current_user_screen_name,
+                :trunc_date, :yesterday
   
   
   
@@ -17,15 +18,6 @@ class TwitterCrawlerController < ApplicationController
 
   # ------------------------------------------------------------------
   # Zeigt Details zum übergebenen User.
-  #
-  # TODO: Lesen aus der Datenbank vs. Lesen von Twitter
-  #       (1) nur von Twitter lesen, wenn User nicht in lokaler DB, user_timeline
-  #           immer von Twitter
-  #       (2) aus der DB lesen, wenn vorhanden und Datensatz <heute> schon
-  #           aktualisiert wurde, user_timeline immer von Twitter
-  #       (3) von Twitter, wenn
-  #                 a) User nicht vorhanden oder
-  #                 b) User nicht nach dem letzten Status aktualisiert wurde 
   # 
   # Params:
   #   screen_name   => zu zeigender User
@@ -64,6 +56,8 @@ class TwitterCrawlerController < ApplicationController
   end
 
 
+  # ------------------------------ helper ---------------------------#
+
 
   def current_user
     session[:user_info]
@@ -80,6 +74,23 @@ class TwitterCrawlerController < ApplicationController
     session[:user_info]["nickname"]
   end
   
+  
+  # ------------------------------------------------------------------
+  # Beschneidet ein Datum auf Sekunden
+  # ------------------------------------------------------------------
+  def trunc_date(d)
+    Time.mktime(d.year, d.month, d.day) unless d.nil?
+  end
+  
+  
+  # ------------------------------------------------------------------
+  # Liefert "Gestern", selbe Zeit
+  # ------------------------------------------------------------------
+  def yesterday
+    Time.now() - 86400
+  end
+  
+  # ------------------------------ helper ---------------------------#
 
   
   
@@ -92,18 +103,27 @@ class TwitterCrawlerController < ApplicationController
   #
   # Gibt das TwitterUser-Objekt des users zurück.Benötigt @twitter_client
   #
+  # Lesen aus der Datenbank vs. Lesen von Twitter
+  #       --> aus der DB lesen, wenn vorhanden und Datensatz <heute> schon
+  #           aktualisiert wurde, user_timeline immer von Twitter
+  #       (3) von Twitter, wenn
+  #                 a) User nicht vorhanden oder
+  #                 b) User nicht nach dem letzten Status aktualisiert wurde
+  #
   # Parameter:
   #     sn      screen_name
   # ------------------------------------------------------------------
   def process_user(sn)
     tw_user = TwitterUser.find_by_screen_name(sn)
     
-    #if (tw_user.nil?) then
+    today = trunc_date(Time.now())
+    
+    if (tw_user.nil? || tw_user.updated_at < today) then
       @user = lookup_screen_name(sn)
           
       tw_user = TwitterUser.create_or_update(@user)
       tw_user.save!
-    #end
+    end
     
     tw_user
   end
