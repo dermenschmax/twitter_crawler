@@ -25,6 +25,14 @@ class TwitterUser < ActiveRecord::Base
   validates_presence_of :lang
   validates_presence_of :profile_image_url
   
+  has_many :twitter_friends
+  has_many :friends, :through => :twitter_friends
+  
+  has_many :twitter_followers
+  has_many :followers, :through => :twitter_followers
+  
+  has_many :tweets
+  
   # ------------------------------------------------------------------
   # Erzeugt und speichert TwitterUser mit den im Mashie gespeicherten Daten
   #
@@ -75,5 +83,10 @@ class TwitterUser < ActiveRecord::Base
     self.updated_at = Time.now()
   end
   
+  
+  # TODO: hack
+  def status
+    nil
+  end
   
 end

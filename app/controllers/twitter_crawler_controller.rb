@@ -38,15 +38,17 @@ class TwitterCrawlerController < ApplicationController
       
       @twitter_client = Twitter::Client.new()
       @user = process_user(sn)
+      @friends = process_friends()
+      @followers = process_followers()
+     
+      
+    logger.debug("TwFollower.count: #{TwitterFollower.count()}")
+      
+    TwitterFollower.all.each() do |tf|
+      logger.debug("Follower: #{tf.twitter_user.screen_name} -> #{tf.follower.screen_name}") unless (tf.nil? ||tf.twitter_user.nil? || tf.follower.nil?)
+    end
       
       unless (@twitter_client.nil?)
-        
-        friend_ids = @twitter_client.friend_ids(@user.screen_name) 
-        follower_ids = @twitter_client.follower_ids(@user.screen_name) 
-        
-        
-        @friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
-        @followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
         
       end
@@ -128,12 +130,78 @@ class TwitterCrawlerController < ApplicationController
     tw_user
   end
   
+
+
+  # ------------------------------------------------------------------
+  # Bearbeitet die Leute, denen der angezeigte User folgt (friends)
+  #
+  # Gibt ein Array mit den zugehörigen Usern zurück. Es wird eine Auswahl (s. u.)
+  # geliefert
+  #
+  # Lesen aus der Datenbank vs. Lesen von Twitter
+  #   - Freundesliste wird von Twitter geholt, wenn
+  #     -> der User <heute> angelegt oder geändert wurde
+  #
+  #   - die Freunde werden von Twitter geholt, wenn sie nicht vorhanden sind oder 
+  #     nicht <heute> aktualisiert wurden
+  #
+  # Auswahl der anzuzeigenden friends:
+  #       - TODO
+  #
+  # Vorbedinung:
+  #     @user ist gesetzt
+  #
+  # 
+  # ------------------------------------------------------------------  
+  def process_friends
+    today = trunc_date(Time.now)
+    
+    if ( today == trunc_date(@user.created_at) || tw_user.updated_at < today) then
+      
+      logger.debug("[process_friends] loading friend_ids from twitter")
+      
+      friend_ids = @twitter_client.friend_ids(@user.screen_name) 
+      friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
+      
+      friends.each() do |f|
+        @user.friends << f
+      end
+      
+      @user.save!
+    else
+      logger.debug("[process_friends] reading friends from database")
+      
+      friends = @user.friends  
+    end
+  
+    friends
+  end
+  
+  def process_followers
+    today = trunc_date(Time.now())
+    
+    if ( today == trunc_date(@user.created_at) || tw_user.updated_at < today) then
+      follower_ids = @twitter_client.follower_ids(@user.screen_name) 
+      followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
+      
+      followers.each() do |f|
+        @user.followers << f
+      end
+      
+      @user.save!
+    else
+      followers = @user.followers
+    end
+    
+    followers
+  end
+  
   
   # ------------------------------------------------------------------
   # Läuft durch die übergebenen IDs und fragt die zugehörigen User ab.
   # Sortiert nach Datum des letzten Tweets.
   #
-  # Gibt Mash-Objekte zurück.
+  # Gibt TwitterUser-Objekte zurück.
   #
   # Algorithmus:
   #   - Basis: die ersten 100 IDs, die werden gezeigt
@@ -141,29 +209,31 @@ class TwitterCrawlerController < ApplicationController
   # ------------------------------------------------------------------
   def user_lookup(ids)
     
-    users = Array.new()
+    twitter_users = Array.new()
     
-    unless (@twitter_client.nil?)
-      users = @twitter_client.users(ids.first(100), :include_entities => 1)
-    end
+    users = @twitter_client.users(ids.first(100), :include_entities => 1) unless (@twitter_client.nil?)
+    
     
     # User speichern
     users.each do |u|
       tw = TwitterUser.create_or_update(u)
       tw.save!
+      twitter_users << tw
     end
     
     # Ergebnis nach Datum des letzten Tweets (status) sortieren
-    users.sort_by! do |u|
-      unless (u.status.nil?) then        
-        d = Date.parse(u.status.created_at)
-      else
-        Date.new(1970)
-      end
-    end
+    #twitter.users.sort_by! do |u|
+    #  unless (u.status.nil?) then        
+    #    d = Date.parse(u.status.created_at)
+    #  else
+    #    Date.new(1970)
+    #  end
+    #end
+    # TODO: geht nicht 
+    
     
     # Absteigend sortieren
-    users.reverse!
+    twitter_users.reverse!
   end
   
   
