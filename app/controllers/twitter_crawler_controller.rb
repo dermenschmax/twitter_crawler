@@ -37,17 +37,11 @@ class TwitterCrawlerController < ApplicationController
     unless (sn.nil?)
       
       @twitter_client = Twitter::Client.new()
+      
       @user = process_user(sn)
       @friends = process_friends()
       @followers = process_followers()
-     
-      
-    logger.debug("TwFollower.count: #{TwitterFollower.count()}")
-      
-    TwitterFollower.all.each() do |tf|
-      logger.debug("Follower: #{tf.twitter_user.screen_name} -> #{tf.follower.screen_name}") unless (tf.nil? ||tf.twitter_user.nil? || tf.follower.nil?)
-    end
-      
+       
       unless (@twitter_client.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
         
@@ -156,9 +150,7 @@ class TwitterCrawlerController < ApplicationController
   def process_friends
     today = trunc_date(Time.now)
     
-    if ( today == trunc_date(@user.created_at) || tw_user.updated_at < today) then
-      
-      logger.debug("[process_friends] loading friend_ids from twitter")
+    if ( today == trunc_date(@user.created_at) || @user.updated_at < today) then
       
       friend_ids = @twitter_client.friend_ids(@user.screen_name) 
       friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
@@ -177,10 +169,11 @@ class TwitterCrawlerController < ApplicationController
     friends
   end
   
+  
   def process_followers
     today = trunc_date(Time.now())
     
-    if ( today == trunc_date(@user.created_at) || tw_user.updated_at < today) then
+    if ( today == trunc_date(@user.created_at) || @user.updated_at < today) then
       follower_ids = @twitter_client.follower_ids(@user.screen_name) 
       followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
       
@@ -189,6 +182,7 @@ class TwitterCrawlerController < ApplicationController
       end
       
       @user.save!
+      
     else
       followers = @user.followers
     end
