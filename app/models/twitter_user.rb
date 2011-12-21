@@ -81,12 +81,18 @@ class TwitterUser < ActiveRecord::Base
     self.profile_image_url = user_mashie.profile_image_url
     self.json_data = user_mashie.to_json()
     self.updated_at = Time.now()
+    
+    unless (user_mashie.status.nil?)
+      last_tweet = user_mashie.status
+      t = Tweet.find_by_tw_id(last_tweet.id)
+      
+      if (t.nil?) then
+        t = Tweet.create_from_twitter_status(last_tweet)
+        
+        self.tweets << t
+      end
+    end
   end
-  
-  
-  # TODO: hack
-  def status
-    nil
-  end
+
   
 end

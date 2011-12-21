@@ -126,7 +126,16 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
   #
   # In diesem Test existiert der status noch nicht
   test "last_tweet" do
-    assert false
+    
+    fake_twitter_login()
+    sn = "der_mensch_max"
+    
+    get :show, :screen_name => sn           # TwitterUser wurde angelegt (inkl. f&f)
+    
+    tw = TwitterUser.find_by_screen_name(sn)        # 
+    assert_not_nil(tw, "found ref user in db")
+    assert((tw.tweets.count() > 0), "user should have tweets")
+    
   end
   
   
@@ -136,7 +145,25 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
   # In diesem Test existiert der status bereits und wird nicht überschrieben oder
   # verdoppelt
   test "last_tweet_exists" do
-    assert false
+    fake_twitter_login()
+    sn = "der_mensch_max"
+    
+    get :show, :screen_name => sn           # TwitterUser wurde angelegt (inkl. f&f)
+    
+    tw = TwitterUser.find_by_screen_name(sn)        # 
+    assert_not_nil(tw, "found ref user in db")
+    assert((tw.tweets.count() > 0), "user should have tweets")
+    
+    tweet_cnt = tw.tweets.count()
+    tw.updated_at = Time.now - 172800       # Aktualisierung weit zurück drehen
+    assert(tw.save, "save updated user")
+    user_updated = tw.updated_at
+    
+    get :show, :screen_name => sn
+    tw2 = TwitterUser.find_by_screen_name(sn)
+    assert_not_nil(tw2, "user found again in db")
+    assert((tw2.updated_at > tw.updated_at), "user should be updated")
+    assert((tw2.tweets.count() == tweet_cnt), "no new tweets for ref user, expected: #{tweet_cnt} but is: #{tw2.tweets.count()}")
   end
   
   

@@ -39,8 +39,8 @@ class TwitterCrawlerController < ApplicationController
       @twitter_client = Twitter::Client.new()
       
       @user = process_user(sn)
-      @friends = process_friends()
-      @followers = process_followers()
+      @friends = @user.friends()
+      @followers = @user.followers()
        
       unless (@twitter_client.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
@@ -115,9 +115,13 @@ class TwitterCrawlerController < ApplicationController
     today = trunc_date(Time.now())
     
     if (tw_user.nil? || tw_user.updated_at < today) then
-      @user = lookup_screen_name(sn)
+      user_mashie = lookup_screen_name(sn)
           
-      tw_user = TwitterUser.create_or_update(@user)
+      tw_user = TwitterUser.create_or_update(user_mashie)
+      
+      process_friends(tw_user)      # Unterebenen: Freunde
+      process_followers(tw_user)    # Unterebene: Follower
+      
       tw_user.save!
     end
     
@@ -147,47 +151,25 @@ class TwitterCrawlerController < ApplicationController
   #
   # 
   # ------------------------------------------------------------------  
-  def process_friends
-    today = trunc_date(Time.now)
+  def process_friends(tw_user)
+
+    friend_ids = @twitter_client.friend_ids(tw_user.screen_name) 
+    friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
     
-    if ( today == trunc_date(@user.created_at) || @user.updated_at < today) then
-      
-      friend_ids = @twitter_client.friend_ids(@user.screen_name) 
-      friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
-      
-      friends.each() do |f|
-        @user.friends << f
-      end
-      
-      @user.save!
-    else
-      logger.debug("[process_friends] reading friends from database")
-      
-      friends = @user.friends  
+    friends.each() do |f|
+      tw_user.friends << f
     end
-  
-    friends
+      
   end
   
   
-  def process_followers
-    today = trunc_date(Time.now())
+  def process_followers(tw_user)
+    follower_ids = @twitter_client.follower_ids(tw_user.screen_name) 
+    followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
     
-    if ( today == trunc_date(@user.created_at) || @user.updated_at < today) then
-      follower_ids = @twitter_client.follower_ids(@user.screen_name) 
-      followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
-      
-      followers.each() do |f|
-        @user.followers << f
-      end
-      
-      @user.save!
-      
-    else
-      followers = @user.followers
+    followers.each() do |f|
+      tw_user.followers << f
     end
-    
-    followers
   end
   
   
