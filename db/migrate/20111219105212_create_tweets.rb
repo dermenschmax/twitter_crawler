@@ -3,7 +3,7 @@ class CreateTweets < ActiveRecord::Migration
     create_table :tweets do |t|
       t.integer :twitter_user_id
       
-      t.integer :tw_id
+      t.string :tw_id_str
       t.text    :text
       t.integer :retweet_count
       t.integer :in_reply_to_user_id

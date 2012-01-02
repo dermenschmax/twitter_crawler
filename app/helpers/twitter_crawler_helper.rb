@@ -20,6 +20,21 @@ module TwitterCrawlerHelper
   end
   
   
+  def short_timestamp(ts)
+    
+    unless (ts.nil?)
+      ret = if (ts.today?)
+              "today" 
+            else
+              ts.strftime("%a, %d %b")  
+            end
+    else
+      ""
+    end
+    
+  end
+  
+  
   def join_hash_tags(hash_tags)
     hash_tags.collect{|ht| "#"+ht.text}.join(" ; ")
   end

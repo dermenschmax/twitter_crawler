@@ -39,8 +39,10 @@ class TwitterCrawlerController < ApplicationController
       @twitter_client = Twitter::Client.new()
       
       @user = process_user(sn)
-      @friends = @user.friends()
-      @followers = @user.followers()
+      @friends = sort_by_last_tweet(@user.friends().to_a())
+      @followers = sort_by_last_tweet(@user.followers().to_a())
+      #@friends = @user.friends().to_a().sort_by{|f| f.last_tweet().created_at}.reverse
+      #@followers = @user.followers().to_a().sort_by{|f| f.last_tweet().created_at}.reverse
        
       unless (@twitter_client.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
@@ -116,13 +118,14 @@ class TwitterCrawlerController < ApplicationController
     
     if (tw_user.nil? || tw_user.updated_at < today) then
       user_mashie = lookup_screen_name(sn)
-          
+      
       tw_user = TwitterUser.create_or_update(user_mashie)
       
       process_friends(tw_user)      # Unterebenen: Freunde
       process_followers(tw_user)    # Unterebene: Follower
       
       tw_user.save!
+      
     end
     
     tw_user
@@ -174,6 +177,26 @@ class TwitterCrawlerController < ApplicationController
   
   
   # ------------------------------------------------------------------
+  # Sortiert das übergebene Array nach dem Datum des letzten Tweet. Gab
+  # es noch keinen, wird 1970 als Datum angenommen.
+  # ------------------------------------------------------------------ 
+  def sort_by_last_tweet(user_array)
+    user_array.sort_by! do |f|
+      t = f.last_tweet()
+      
+      unless(t.nil?) then
+        f.last_tweet().created_at
+      else
+        Time.zone.parse("1970-01-01") 
+      end 
+    end
+    
+    user_array
+  end
+  
+  
+  
+  # ------------------------------------------------------------------
   # Läuft durch die übergebenen IDs und fragt die zugehörigen User ab.
   # Sortiert nach Datum des letzten Tweets.
   #
@@ -196,17 +219,6 @@ class TwitterCrawlerController < ApplicationController
       tw.save!
       twitter_users << tw
     end
-    
-    # Ergebnis nach Datum des letzten Tweets (status) sortieren
-    #twitter.users.sort_by! do |u|
-    #  unless (u.status.nil?) then        
-    #    d = Date.parse(u.status.created_at)
-    #  else
-    #    Date.new(1970)
-    #  end
-    #end
-    # TODO: geht nicht 
-    
     
     # Absteigend sortieren
     twitter_users.reverse!

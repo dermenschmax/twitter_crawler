@@ -20,15 +20,15 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
   
   # testet, ob die grundlegenden Dinge gesetzt sind und ein Twitter-Aufruf
   # funktioniert
-  test "fake_twitter_login" do
-    fake_twitter_login
-    tc = Twitter::Client.new()
-    
-    assert_not_nil(session[:provider], "provider should be stored in session")
-    assert_not_nil(session[:uid], "uid should be stored in session")
-    assert_not_nil(session[:credentials], "credentials should be stored in session")
-    assert_not_nil(tc.user_timeline("der_mensch_max"), "twitter client should be able to read user timeline")
-  end
+  #test "fake_twitter_login" do
+  #  fake_twitter_login
+  #  tc = Twitter::Client.new()
+  #  
+  #  assert_not_nil(session[:provider], "provider should be stored in session")
+  #  assert_not_nil(session[:uid], "uid should be stored in session")
+  #  assert_not_nil(session[:credentials], "credentials should be stored in session")
+  #  assert_not_nil(tc.user_timeline("der_mensch_max"), "twitter client should be able to read user timeline")
+  #end
   
   
   # Zeigt Details zum übergebenen User
@@ -68,17 +68,17 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
     
     assert(TwitterFollower.count() == tw.followers.count(), "TwitterFollower.count() == tw.followers.count, but #{TwitterFollower.count()} != #{tw.followers.count()}")
     assert(TwitterFriend.count() == tw.friends.count(), "TwitterFriend.count() == tw.friends.count, but #{TwitterFriend.count()} != #{tw.friends.count()}")
-
+  
   end
   
   
-  # testet eine Subroutine von show, in der entschieden wird, ob ein nur user aus 
-  # der Datenbank kommt oder von Twitter geladen wird.
-  #
-  # Szenario:
-  #     - user anlegen
-  #     - show aufrufen
-  #     => user wird nicht aktualisiert (updated_at)
+   # testet eine Subroutine von show, in der entschieden wird, ob ein nur user aus 
+   # der Datenbank kommt oder von Twitter geladen wird.
+   #
+   # Szenario:
+   #    - user anlegen
+   #    - show aufrufen
+   #    => user wird nicht aktualisiert (updated_at)
   test "process_user" do
     
     fake_twitter_login()
@@ -96,8 +96,8 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
   end
   
   
-  # get-request für User in der Datenbank. Wenn der User vor <heute> das letzte Mal aktualisiert
-  # wurde, gibt es trotzdem einen api Aufruf
+   # get-request für User in der Datenbank. Wenn der User vor <heute> das letzte Mal aktualisiert
+   # wurde, gibt es trotzdem einen api Aufruf
   test "process_user_yesterday" do
     fake_twitter_login()
     sn = "der_mensch_max"
@@ -159,12 +159,32 @@ class TwitterCrawlerControllerTest < ActionController::TestCase
     assert(tw.save, "save updated user")
     user_updated = tw.updated_at
     
+    puts "first get - listing Tweets"
+    Tweet.find(:all).each() do |tw|
+      puts("Tweet: #{tw.id} - #{tw.tw_id_str} - #{tw.text}")
+    end
+    
+    
     get :show, :screen_name => sn
+    
+    puts "second get - listing Tweets"
+    Tweet.all.each() do |tw|
+      puts("Tweet: #{tw.id} - #{tw.tw_id_str} - #{tw.text}")
+    end
+    
+    
     tw2 = TwitterUser.find_by_screen_name(sn)
     assert_not_nil(tw2, "user found again in db")
     assert((tw2.updated_at > tw.updated_at), "user should be updated")
     assert((tw2.tweets.count() == tweet_cnt), "no new tweets for ref user, expected: #{tweet_cnt} but is: #{tw2.tweets.count()}")
   end
+  
+  
+  # Testet, ob beim Speichern des Tweets auch HashTags und Mentions gespeichert
+  # werden
+  #test "entities" do
+  #  assert false
+  #end
   
   
 end

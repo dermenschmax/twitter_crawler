@@ -5,7 +5,7 @@
 #
 # Attribute:
 #    t.string   "name"
-#    t.integer  "tw_id"
+#    t.string  "tw_id_str"
 #    t.string   "screen_name"
 #    t.integer  "followers_count"
 #    t.integer  "friends_count"
@@ -18,7 +18,8 @@
 class TwitterUser < ActiveRecord::Base
   
   validates_presence_of :name
-  validates_presence_of :tw_id
+  validates_presence_of :tw_id_str
+  validates_uniqueness_of :tw_id_str
   validates_presence_of :screen_name
   validates_presence_of :followers_count
   validates_presence_of :friends_count
@@ -34,7 +35,7 @@ class TwitterUser < ActiveRecord::Base
   has_many :tweets
   
   # ------------------------------------------------------------------
-  # Erzeugt und speichert TwitterUser mit den im Mashie gespeicherten Daten
+  # DEPRECATED: Erzeugt und speichert TwitterUser mit den im Mashie gespeicherten Daten
   #
   # Parameter:
   #   user_mashie   Mashie    die Attribute
@@ -55,6 +56,7 @@ class TwitterUser < ActiveRecord::Base
   #   user_mashie   Mashie    die Attribute
   # ------------------------------------------------------------------ 
   def self.create_or_update(user_mashie)
+    
     unless (user_mashie.nil?)
       tw = TwitterUser.find_by_screen_name(user_mashie.screen_name) || TwitterUser.new()
       
@@ -73,7 +75,7 @@ class TwitterUser < ActiveRecord::Base
   # ------------------------------------------------------------------
   def refresh!(user_mashie)
     self.name = user_mashie.name
-    self.tw_id = user_mashie.id
+    self.tw_id_str = user_mashie.id_str
     self.screen_name = user_mashie.screen_name
     self.followers_count = user_mashie.followers_count
     self.friends_count = user_mashie.friends_count
@@ -84,15 +86,46 @@ class TwitterUser < ActiveRecord::Base
     
     unless (user_mashie.status.nil?)
       last_tweet = user_mashie.status
-      t = Tweet.find_by_tw_id(last_tweet.id)
-      
-      if (t.nil?) then
-        t = Tweet.create_from_twitter_status(last_tweet)
+
+      #t = Tweet.find_by_tw_id_str(last_tweet.id)
+      t = Tweet.where("tw_id_str = ?", last_tweet.id_str)
         
-        self.tweets << t
+      if (screen_name == "der_mensch_max") then
+          logger.debug("[refresh!] last_tweet.id: #{last_tweet.id}")
+          logger.debug("[refresh!] t.count(): #{t.count()}")
+      #    logger.debug("[refresh!] Tweet.count(): #{Tweet.count()}")
+      #    logger.debug("[refresh!] tweets.count()(): #{tweets.count()}")
+      #    
+      #    logger.debug("[refresh!] dumping tweets ")
+      #    Tweet.all.each() do |tw|
+      #      logger.debug("[refresh!] saved tweet #{tw.id} -> #{tw.tw_id_str} - #{tw.text}")
+      #    end
+      end   
+        
+      if (t.nil? || t.count() == 0) then
+        
+        logger.debug("[refresh!] create tweet for tw_id_str #{last_tweet.id_str} -> #{last_tweet.text}") if (screen_name == "der_mensch_max")
+        
+        tw = Tweet.create_from_twitter_status(last_tweet)
+        tw.save!
+        
+        logger.debug("[refresh!] created tweed id: #{tw.id}, tw_id_str: #{tw.tw_id_str}") if (screen_name == "der_mensch_max")
+        
+        self.tweets << tw
       end
     end
+    
   end
 
+
+  # ------------------------------------------------------------------
+  # Liefert den letzten Tweet des Users. Convenience Methode
+  #
+  # Parameter:
+  #   
+  # ------------------------------------------------------------------
+  def last_tweet
+    tweets.order("updated_at desc").first unless (tweets.nil? || tweets.size == 0)
+  end
   
 end

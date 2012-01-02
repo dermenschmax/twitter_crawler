@@ -22,19 +22,23 @@
             </div> <!-- ule_short -->
             
             <div id="ule_all_<%= ue.id -%>" class="ule_all" style="display: none;">
-              <% unless ue.status.nil? -%>
+              <% unless ue.last_tweet().nil? -%>
                 <table>
                   <tr>
                     <td>HashTags</td>
-                    <td><%= join_hash_tags(ue.status.entities.hashtags) -%></td>
+                    <td>
+                      <!--< %= join_hash_tags(ue.status.entities.hashtags) -% >-->
+                    </td>
                   </tr>
                   <tr>
                     <td>Mentions</td>
-                    <td><%= join_mentions(ue.status.entities.user_mentions) -%></td>
+                    <td>
+                      <!--< %= join_mentions(ue.status.entities.user_mentions) -% >-->
+                    </td>
                   </tr>
                   <tr>
-                    <td><%= short_date(ue.status.created_at) %></td>
-                    <td><%= ue.status.text%></td>
+                    <td><%= short_timestamp(ue.last_tweet.created_at) %></td>
+                    <td><%= ue.last_tweet.text%></td>
                   </tr>
                 </table>
               <% end -%>
