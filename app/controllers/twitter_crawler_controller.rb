@@ -41,12 +41,9 @@ class TwitterCrawlerController < ApplicationController
       @user = process_user(sn)
       @friends = sort_by_last_tweet(@user.friends().to_a())
       @followers = sort_by_last_tweet(@user.followers().to_a())
-      #@friends = @user.friends().to_a().sort_by{|f| f.last_tweet().created_at}.reverse
-      #@followers = @user.followers().to_a().sort_by{|f| f.last_tweet().created_at}.reverse
        
       unless (@twitter_client.nil?)
         @user_tweets = @twitter_client.user_timeline(@user.screen_name, :include_entities => 1)
-        
       end
       
       logger.info("@user = #{@user}")
@@ -116,6 +113,8 @@ class TwitterCrawlerController < ApplicationController
     
     today = trunc_date(Time.now())
     
+    # User aktualisieren, wenn er nicht existiert oder heute noch nicht aktualisiert
+    # wurde
     if (tw_user.nil? || tw_user.updated_at < today) then
       user_mashie = lookup_screen_name(sn)
       
@@ -125,7 +124,12 @@ class TwitterCrawlerController < ApplicationController
       process_followers(tw_user)    # Unterebene: Follower
       
       tw_user.save!
-      
+    
+    # User existiert und wurde heute schon aktualisiert. Müssen ggf. nur noch
+    # friends & followers nachgeladen werden
+    elsif (tw_user.processed_at.nil? || tw_user.processed_at < today)
+      process_friends(tw_user)      # Unterebenen: Freunde
+      process_followers(tw_user)    # Unterebene: Follower
     end
     
     tw_user
@@ -156,22 +160,39 @@ class TwitterCrawlerController < ApplicationController
   # ------------------------------------------------------------------  
   def process_friends(tw_user)
 
-    friend_ids = @twitter_client.friend_ids(tw_user.screen_name) 
-    friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)
+    friend_ids = @twitter_client.friend_ids(tw_user.screen_name)      # Mashie
+    f_ids = friend_ids.ids  unless (friend_ids.nil?)
+    
+    # Auflösen der User und Update in der DB, ändert u. U. auch den Zeitpunkt
+    # des letzten Tweets
+    friends = user_lookup(friend_ids.ids) unless (friend_ids.nil?)  
+    
+    # diese Freunde kennen wir schon
+    known_friends = tw_user.friends.collect{|k| k.tw_id_str.to_i()}
+    
+    del_me = known_friends - f_ids
+    add_me = f_ids - known_friends
     
     friends.each() do |f|
-      tw_user.friends << f
+        tw_user.friends << f  if (add_me.include?(f.tw_id_str.to_i()))
     end
       
   end
   
   
   def process_followers(tw_user)
-    follower_ids = @twitter_client.follower_ids(tw_user.screen_name) 
+    follower_ids = @twitter_client.follower_ids(tw_user.screen_name)
+    f_ids = follower_ids.ids unless (follower_ids.nil?)
+    
     followers = user_lookup(follower_ids.ids) unless (follower_ids.nil?)
     
+    known_followers = tw_user.followers.collect{|k| k.tw_id_str.to_i()}
+    
+    del_me = known_followers - f_ids
+    add_me = f_ids - known_followers
+    
     followers.each() do |f|
-      tw_user.followers << f
+      tw_user.followers << f if (add_me.include?(f.tw_id_str.to_i()))
     end
   end
   
@@ -191,7 +212,7 @@ class TwitterCrawlerController < ApplicationController
       end 
     end
     
-    user_array
+    user_array.reverse()
   end
   
   

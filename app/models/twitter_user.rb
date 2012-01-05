@@ -5,12 +5,13 @@
 #
 # Attribute:
 #    t.string   "name"
-#    t.string  "tw_id_str"
+#    t.string   "tw_id_str"
 #    t.string   "screen_name"
 #    t.integer  "followers_count"
 #    t.integer  "friends_count"
 #    t.string   "lang"
 #    t.string   "profile_image_url"
+#    t.datetime "processed_at"
 #    t.datetime "created_at"
 #    t.datetime "updated_at"
 #    t.text     "json_data"
@@ -83,6 +84,8 @@ class TwitterUser < ActiveRecord::Base
     self.profile_image_url = user_mashie.profile_image_url
     self.json_data = user_mashie.to_json()
     self.updated_at = Time.now()
+    
+    # self.processed_at wird nicht gesetzt
     
     unless (user_mashie.status.nil?)
       last_tweet = user_mashie.status
