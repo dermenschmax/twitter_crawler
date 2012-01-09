@@ -3,4 +3,3 @@ config/database.yml
 log/*
 webdesign/*
 public/assets/*
-test/test_helper.rb
